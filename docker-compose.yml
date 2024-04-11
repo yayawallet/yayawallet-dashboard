@@ -3,15 +3,17 @@ version: '3.8'
 services:
   frontend:
     image: yayawallet/react-dashboard:latest
+    environment:
+        - VITE_BASE_URL=http://localhost:4040
     ports:
-      - "5173:5173"
+      - "3030:3030"
     depends_on:
       - backend
 
 #  backend:
 #    image: yayawallet/python-server:latest
 #    ports:
-#      - "4040:8000"
+#      - "8000:8000"
 #    env_file:
 #      - .env
 
