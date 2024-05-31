@@ -40,6 +40,9 @@ services:
         python manage.py makemigrations
         python manage.py migrate
         python manage.py runserver 0.0.0.0:8000
+        if [ "$DJANGO_SUPERUSER_USERNAME" ] && [ "$DJANGO_SUPERUSER_EMAIL" ] && [ "$DJANGO_SUPERUSER_PASSWORD" ]; then
+          python manage.py createsuperuser --noinput || true
+        fi
     ports:
       - "8000:8000"
     env_file:
