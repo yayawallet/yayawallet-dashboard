@@ -1,25 +1,68 @@
 version: "3.8"
 
 services:
-  react-dashboard:
-    image: yayawallet/react-dashboard
+  frontend:
+    image: yayawallet/react-dashboard:latest
     ports:
-      - "3030:3030"
+      - "3000:3000"
     environment:
-      - VITE_BASE_URL=http://localhost:4040
-    depends_on:
-      - nodejs-server
+      - VITE_BASE_URL=http://localhost:8000
 
-  nodejs-server:
-    image: yayawallet/nodejs-server
+  db:
+    image: postgres
     ports:
-      - "4040:4040"
+      - 5462:5432
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
     env_file:
       - .env
 
-  # python-server:
-  # image: yayawallet/python-server
-  # ports:
-  #   - "8000:8000"
-  # env_file:
-  #   - .env
+  rabbitmq_server:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  worker:
+    image: yayawallet/background-service:latest
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq_server
+      - db
+
+  backend:
+    image: yayawallet/python-server:latest
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        sleep 20
+        python manage.py makemigrations
+        python manage.py migrate
+        if [ "$DJANGO_SUPERUSER_USERNAME" ] && [ "$DJANGO_SUPERUSER_EMAIL" ] && [ "$DJANGO_SUPERUSER_PASSWORD" ]; then
+          python manage.py createsuperuser --noinput || true
+        fi
+        python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - worker
+
+  # backend:
+  #   image: yayawallet/nodejs-server:latest
+  #   ports:
+  #     - "4040:4040"
+  #   env_file:
+  #     - .env
+
+  # backend:
+  #   image: yayawallet/java-server:latest
+  #   ports:
+  #     - "8080:8080"
+  #   env_file:
+  #     - .env
+
+  # backend: /* add backend service here d*/
