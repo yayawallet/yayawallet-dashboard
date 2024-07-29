@@ -2,21 +2,38 @@
 This is a repository with configuration setup to run YaYa wallet dashboard.
 
 # Environment
-Before you run it, you first must setup environment variables to be used by the system. To set it up, you need to create a .env file and add the following environment variables:
+You have to set the following environment variables for the project to run successfully.
 ```
-POSTGRES_DB=dashboard
-POSTGRES_USER={your_db_user}
-POSTGRES_PASSWORD={your_db_password}
-YAYA_API_URL=https://yayawallet.com/api/en
+YAYA_API_URL=https://sandbox.yayawallet.com/api/en
 YAYA_API_PATH=/api/en
-YAYA_API_KEY={your_yayawallet_api_key}
-YAYA_API_SECRET={your_yayawallet_api_secret}
+POSTGRES_DB={YOUR_DATABASE_NAME}
+POSTGRES_USER={YOUR_DATABASE_USER}
+POSTGRES_PASSWORD={YOUR_DATABASE_PASSWORD}
+DJANGO_SUPERUSER_USERNAME={SUPERUSER_USERNAME}
+DJANGO_SUPERUSER_EMAIL={SUPERUSER_EMAIL}
+DJANGO_SUPERUSER_PASSWORD={SUPERUSER_PASSWORD}
+{user1_api_key}_YAYA_API_SECRET={user1_api_secret}
+{user2_api_key}_YAYA_API_SECRET={user2_api_secret}
+...more user secret keys, if available
 ```
-
-You can find the last two credentials on https://yayawallet.com/en/profile/settings, after you logged in to your account on a browser.
 
 # How to run it?
 The project is dockerized, so you can simply run it by running the following command in the terminal:
 ```
 docker-compose up
+```
+
+# Configuration
+Once you run the project, go to the admin module and login using the credentials you set for superadmin on environment variables. Then go to groups, select Admin Group and add the following permissions to that group:
+```
+auth | user | Can add user
+auth | user | Can change user
+auth | user | Can delete user
+auth | user | Can view user
+dashboard | user profile | Can add user profile
+dashboard | user profile | Can change user profile
+dashboard | user profile | Can delete user profile
+dashboard | user profile | Can view user profile
+auth | group | Can view group
+auth | permission | Can view permission
 ```
