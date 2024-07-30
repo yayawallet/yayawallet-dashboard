@@ -50,6 +50,8 @@ services:
     depends_on:
       - db
       - worker
+    environment:
+      - PYTHONUNBUFFERED=1
 
   # backend:
   #   image: yayawallet/nodejs-server:latest
