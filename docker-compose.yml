@@ -82,12 +82,16 @@ services:
 
   backend:
     image: yayawallet/python-server:latest
-    entrypoint: ["/bin/sh", "-c"]
+    entrypoint: ["/bin/sh","-c"]
     command:
       - |
-        sleep 20
-        python manage.py makemigrations
-        python manage.py migrate
+        while ! nc -z db 5432; do
+          echo "Waiting for db..."
+          sleep 2
+        done
+
+        echo "db is up - starting Django"
+        python manage.py automate_permissions
         if [ "$DJANGO_SUPERUSER_USERNAME" ] && [ "$DJANGO_SUPERUSER_EMAIL" ] && [ "$DJANGO_SUPERUSER_PASSWORD" ]; then
           python manage.py createsuperuser --noinput || true
         fi
@@ -99,6 +103,8 @@ services:
     depends_on:
       - db
       - worker
+    environment:
+      - PYTHONUNBUFFERED=1
 
   # backend:
   #   image: yayawallet/nodejs-server:latest
