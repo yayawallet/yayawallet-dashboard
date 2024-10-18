@@ -2,9 +2,9 @@ services:
   frontend:
     image: yayawallet/react-dashboard:latest
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:80"
     environment:
-      - VITE_BASE_URL=http://localhost:8000
+      - VITE_BASE_URL=https://dashboard.yayawallet.com/api
 
   db:
     image: postgres
@@ -46,7 +46,7 @@ services:
         fi
         python manage.py runserver 0.0.0.0:8000
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - ./media:/app/media
     env_file:
