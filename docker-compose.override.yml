@@ -1,0 +1,58 @@
+services:
+  frontend:
+    image: yayawallet/react-dashboard:latest
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_BASE_URL=http://localhost:8000
+
+  db:
+    image: postgres
+    ports:
+      - 5462:5432
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  rabbitmq_server:
+    image: rabbitmq:3-management
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  worker:
+    image: yayawallet/background-service:latest
+    env_file:
+      - .env
+    depends_on:
+      - rabbitmq_server
+      - db
+
+  backend:
+    image: yayawallet/python-server:latest
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while ! nc -z db 5432; do
+          echo "Waiting for db..."
+          sleep 2
+        done
+
+        echo "db is up - starting Django"
+        python manage.py automate_permissions
+        if [ "$DJANGO_SUPERUSER_USERNAME" ] && [ "$DJANGO_SUPERUSER_EMAIL" ] && [ "$DJANGO_SUPERUSER_PASSWORD" ]; then
+          python manage.py createsuperuser --noinput || true
+        fi
+        python manage.py runserver 0.0.0.0:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./media:/app/media
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - worker
+    environment:
+      - PYTHONUNBUFFERED=1
